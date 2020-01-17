@@ -33,23 +33,23 @@ checkImageType = (image) ->
 
 composeDisposers = (outerDisposer, createInnerDisposer) ->
 	Promise.resolve(outerDisposer)
-	.then (outerDisposer) ->
+		.then (outerDisposer) ->
 		outerDisposer._promise
-		.then (outerResult) ->
+			.then (outerResult) ->
 			Promise.try ->
 				Promise.resolve(createInnerDisposer(outerResult))
-				.then (innerDisposer) ->
+					.then (innerDisposer) ->
 					innerDisposer._promise
-					.then ->
-						[ innerDisposer, innerDisposer._promise ]
-			.catch (err) ->
+						.then ->
+						[innerDisposer, innerDisposer._promise]
+				.catch (err) ->
 				outerDisposer._data(outerResult)
 				throw err
-			.spread (innerDisposer, innerResult) ->
+				.spread (innerDisposer, innerResult) ->
 				Promise.resolve(innerResult)
-				.disposer (innerResult) ->
+					.disposer (innerResult) ->
 					Promise.resolve(innerDisposer._data(innerResult))
-					.then ->
+						.then ->
 						outerDisposer._data(outerResult)
 
 ###*
@@ -105,7 +105,7 @@ read = (disk, partition, path) ->
 			outputStream.once('newListener', -> process.nextTick(startReadStream))
 
 			Promise.resolve(outputStream)
-			.disposer (stream) ->
+				.disposer (stream) ->
 				outputStream.end()
 
 				# streams returned by fatfs do not have a close method
@@ -219,6 +219,10 @@ exports.readFile = (definition) ->
 writeFile = (disk, partition, path, contents) ->
 	Promise.using driver.interact(disk, partition), (fs_) ->
 		fs_.writeFileAsync(path, contents)
+
+mkDir = (disk, partition, path) ->
+	Promise.using driver.interact(disk, partition), (fs_) ->
+		fs_.promises.mkdir(path, {recursive: true})
 
 ###*
 # @summary Write a device file
