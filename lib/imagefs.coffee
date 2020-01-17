@@ -222,7 +222,11 @@ writeFile = (disk, partition, path, contents) ->
 
 mkDir = (disk, partition, path) ->
 	Promise.using driver.interact(disk, partition), (fs_) ->
-		fs_.promises.mkdir(path, {recursive: true})
+		fs_.mkdirAsync(path, {recursive: true})
+
+existsSync = (disk, partition, path) ->
+	Promise.using driver.interact(disk, partition), (fs_) ->
+		fs_.existsSync(path)
 
 ###*
 # @summary Write a device file
